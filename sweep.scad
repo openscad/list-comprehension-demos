@@ -2,8 +2,6 @@ use <scad-utils/linalg.scad>
 use <scad-utils/transformations.scad>
 use <scad-utils/lists.scad>
 
-function trajectory(translation, rotation, steps=2) = [for (i=[0:steps-1]) let (t=i/steps) translation(t*translation) * rotation(t*rotation)];
-
 function rotation_from_axis(x,y,z) = [[x[0],y[0],z[0]],[x[1],y[1],z[1]],[x[2],y[2],z[2]]]; 
 
 function rotate_from_to(a,b,_axis=[]) = 
