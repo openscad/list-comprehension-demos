@@ -113,11 +113,10 @@ function dup(value=0,n) = [for (i = [1:n]) value];
 // Find the index of the maximum element of arr
 function max_element(arr,ma_,ma_i_=-1,i_=0) = i_ >= len(arr) ? ma_i_ :
 	i_ == 0 || arr[i_] > ma_ ? max_element(arr,arr[i_],i_,i_+1) : max_element(arr,ma_,ma_i_,i_+1);
+// Alernative, using list comprehensions:
+//function max_element(arr) = let (m=max(arr)) [for (i=[0:len(arr)-1]) if (arr[i]==m) i][0];
 
 //// Range functions
-
-// Expand a range into an array, e.g. range([1:5]) = [1,2,3,4,5];
-function range(r) = [ for(x=r) x ];
 
 // Augments the profile with steiner points making the total number of vertices n 
 function augment_profile(profile, n) = 
@@ -156,14 +155,21 @@ function expand_profile_vertices(profile,n=32) = len(profile) >= n ? profile : e
 
 function increment(arr,i,x=1) = set(arr,i,arr[i]+x);
 
-function distribute_extra_vertex(lengths_count,ma_=-1) = ma_<0 ? distribute_extra_vertex(lengths_count, max_element(lengths_count[0])) :
-	concat([set(lengths_count[0],ma_,lengths_count[0][ma_] * (lengths_count[1][ma_]+1) / (lengths_count[1][ma_]+2))], [increment(lengths_count[1],max_element(lengths_count[0]),1)]);
+function distribute_extra_vertex(lengths_count,ma_=-1) =
+ma_<0 ?
+distribute_extra_vertex(lengths_count, max_element(lengths_count[0])) :
+concat(
+    [set(lengths_count[0],
+         ma_,
+         lengths_count[0][ma_] * (lengths_count[1][ma_]+1) / (lengths_count[1][ma_]+2))
+    ],
+    [increment(lengths_count[1],max_element(lengths_count[0]),1)]
+);
 
 function insert_extra_vertices_0(lengths_count,n_extra) = n_extra <= 0 ? lengths_count : 
 	insert_extra_vertices_0(distribute_extra_vertex(lengths_count),n_extra-1);
 
-function max_len(arr,index_=0,ma_=0) = index_ >= len(arr) ? ma_ :
-	max_len(arr,index_+1,max(ma_,len(arr[index_])));
+function max_len(arr) = max([for (i=arr) len(i)]);
 
 function interpolate(a,b,subdivisions) = [
 	for (index = [0:subdivisions-1])
