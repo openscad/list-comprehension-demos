@@ -47,5 +47,5 @@ module sweep(shape, path_transforms, closed=false) {
 
     bottom_cap = closed ? [] : [[for (i=[len(shape3d)-1:-1:0]) i]];
     top_cap = closed ? [] : [[for (i=[0:len(shape3d)-1]) i+len(shape3d)*(pathlen-1)]];
-    polyhedron(points = sweep_points(), faces = concat(loop_faces(), bottom_cap, top_cap), convexity=2);
+    polyhedron(points = sweep_points(), faces = concat(loop_faces(), bottom_cap, top_cap), convexity=5);
 }
