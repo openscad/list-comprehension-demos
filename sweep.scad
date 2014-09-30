@@ -36,7 +36,7 @@ module sweep(shape, path_transforms, closed=false) {
     shape3d = to_3d(shape);
 
     function sweep_points() =
-      flatten([for (i=[0:pathlen]) transform(path_transforms[i], shape3d)]);
+      flatten([for (i=[0:pathlen-1]) transform(path_transforms[i], shape3d)]);
 
     function loop_faces() = [let (facets=len(shape3d))
         for(s=[0:segments-1], i=[0:facets-1])
