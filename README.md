@@ -45,3 +45,7 @@ To use these demos, first install the scad-utils library (https://github.com/ope
 ## [trefoil-knot-sweep.scad](trefoil-knot-sweep.scad)
 
 ![trefoil-knot-sweep](screenshots/trefoil-knot-sweep.png)
+
+## [3d-function.scad](3d-function.scad)
+
+![3d-function](screenshots/3d-function.png)
