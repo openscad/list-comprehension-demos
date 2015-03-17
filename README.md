@@ -49,3 +49,7 @@ To use these demos, first install the scad-utils library (https://github.com/ope
 ## [3d-function.scad](3d-function.scad)
 
 ![3d-function](screenshots/3d-function.png)
+
+## [spiral-2d.scad](spiral-2d.scad)
+
+![spiral-2d](screenshots/spiral-2d.png)
