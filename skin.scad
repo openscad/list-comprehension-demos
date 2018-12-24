@@ -36,7 +36,7 @@ module skin(profiles, loop=false /* unimplemented */) {
 function augment_profile(profile, n) =
   subdivide(
     profile,
-    insert_extra_vertices_0(
+    insert_extra_vertices_1(
       [profile_lengths(profile),
        dup(0,len(profile))
       ],
@@ -72,6 +72,57 @@ function insert_extra_vertices_0(lengths_count,n_extra) =
       n_extra-1
     );
 
+
+
+function insert_extra_vertices_1(lengths_count,n_extra) =
+  n_extra <= 0 ?
+    lengths_count
+  :
+    insert_extra_vertices_by_length(lengths_count[0], lengths_count[1], sum(lengths_count[0]), 0, n_extra);
+
+function insert_extra_vertices_by_length(lengths, counts, length, curr, n) =
+  curr >= n ?
+    [lengths, counts]
+  :
+    insert_extra_vertices_by_length(
+      lengths,
+      insert_extra_vertex_at_length(lengths,counts,(curr+.5)/n*length),
+      length,
+      curr+1,
+      n);
+
+function insert_extra_vertex_at_length(lengths, counts, length) =
+  increment(counts, element_at_length(lengths, length));
+
+function element_at_length(lengths, length, i=0, acc=0) =
+  acc+lengths[i] >= length || i >= len(lengths)?
+    i
+  :
+    element_at_length(lengths, length, i+1, acc+lengths[i]);
+
+/*
+// unit tests for element_at_length
+
+assert(element_at_length([1,2,1,3], 0)==0);
+assert(element_at_length([1,2,1,3], .5)==0);
+assert(element_at_length([1,2,1,3], 1)==0);
+assert(element_at_length([1,2,1,3], 1.5)==1);
+assert(element_at_length([1,2,1,3], 2.5)==1);
+assert(element_at_length([1,2,1,3], 3)==1);
+assert(element_at_length([1,2,1,3], 3.5)==2);
+assert(element_at_length([1,2,1,3], 6.5)==3);
+assert(element_at_length([1,2,1,3], 7)==3);
+assert(element_at_length([1,2,1,3], 7.5)==4);
+
+
+function assertion_failed() = (assertion_failed());
+module assert(bool, msg = ""){if(bool == false){echo("Assertion Failed: ", msg);
+  echo("", assertion_failed());}}
+*/
+
+
+
+
 // Find the index of the maximum element of arr
 function max_element(arr,ma_,ma_i_=-1,i_=0) = i_ >= len(arr) ? ma_i_ :
   i_ == 0 || arr[i_] > ma_ ? max_element(arr,arr[i_],i_,i_+1) : max_element(arr,ma_,ma_i_,i_+1);
@@ -85,7 +136,38 @@ function profile_lengths(profile) = [
     profile_segment_length(profile,i)
 ];
 
+function overall_length(profile) = sum(profile_lengths(profile));
+
+function sum(arr, i=0, acc=0) =
+  len(arr) <= i ?
+    acc
+  :
+    sum(arr, i+1, acc+arr[i]);
+
 function profile_segment_length(profile,i) = norm(profile[(i+1)%len(profile)] - profile[i]);
 
 // Generates an array with n copies of value (default 0)
 function dup(value=0,n) = [for (i = [1:n]) value];
+
+
+
+/*
+// demonstrate distribution of points
+// if augment_profile uses insert_extra_vertices_0 or ..._1
+// where insert_extra_vertices_1 inserts more uniformly
+// whereas insert_extra_vertices_0 depends on chance rounding
+
+// try changing which function augment_profile uses on line 39
+// and with insert_extra_vertices_0 try changing 10.1 below
+
+module point(coord) {
+  color("red")
+  translate(coord)
+  cylinder(r=1, h=1.5, $fn=12);
+}
+
+use <scad-utils/shapes.scad>
+a=circle($fn=20, r=10.1);
+b=augment_profile(a,30); // distribute extra points
+for(x=b)point(x);
+*/
