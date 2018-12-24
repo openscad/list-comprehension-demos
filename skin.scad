@@ -34,7 +34,15 @@ module skin(profiles, loop=false /* unimplemented */) {
 
 // Augments the profile with steiner points making the total number of vertices n
 function augment_profile(profile, n) =
-  subdivide(profile,insert_extra_vertices_0([profile_lengths(profile),dup(0,len(profile))],n-len(profile))[1]);
+  subdivide(
+    profile,
+    insert_extra_vertices_0(
+      [profile_lengths(profile),
+       dup(0,len(profile))
+      ],
+      n-len(profile)
+    )[1]
+  );
 
 function subdivide(profile,subdivisions) = let (N=len(profile)) [
   for (i = [0:N-1])
@@ -49,11 +57,20 @@ function interpolate(a,b,subdivisions) = [
       a*(1-t)+b*t
 ];
 
-function distribute_extra_vertex(lengths_count,ma_=-1) = ma_<0 ? distribute_extra_vertex(lengths_count, max_element(lengths_count[0])) :
-  concat([set(lengths_count[0],ma_,lengths_count[0][ma_] * (lengths_count[1][ma_]+1) / (lengths_count[1][ma_]+2))], [increment(lengths_count[1],max_element(lengths_count[0]),1)]);
+function distribute_extra_vertex(lengths_count,ma_=-1) =
+  ma_<0
+	? distribute_extra_vertex(lengths_count, max_element(lengths_count[0]))
+  : concat(
+      [set(lengths_count[0],ma_,lengths_count[0][ma_] * (lengths_count[1][ma_]+1) / (lengths_count[1][ma_]+2))],
+      [increment(lengths_count[1],max_element(lengths_count[0]),1)]);
 
-function insert_extra_vertices_0(lengths_count,n_extra) = n_extra <= 0 ? lengths_count :
-  insert_extra_vertices_0(distribute_extra_vertex(lengths_count),n_extra-1);
+function insert_extra_vertices_0(lengths_count,n_extra) =
+  n_extra <= 0
+	? lengths_count
+  : insert_extra_vertices_0(
+      distribute_extra_vertex(lengths_count),
+      n_extra-1
+    );
 
 // Find the index of the maximum element of arr
 function max_element(arr,ma_,ma_i_=-1,i_=0) = i_ >= len(arr) ? ma_i_ :
