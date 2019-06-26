@@ -2,11 +2,12 @@ use <scad-utils/transformations.scad>
 use <scad-utils/lists.scad>
 
 // Skin a set of profiles with a polyhedral mesh
-module skin(profiles, loop=false /* unimplemented */) {
+module skin(profiles, loop=false) {
 	P = max_len(profiles);
 	N = len(profiles);
+	M = P*N;
 
-	profiles = [ 
+	agumented_profiles = [ 
 		for (p = profiles)
 			for (pp = augment_profile(to_3d(p),P))
 				pp
@@ -20,16 +21,17 @@ module skin(profiles, loop=false /* unimplemented */) {
 				for (q = qs) q
 	];
 
-    triangles = [ 
-		for(index = [1:N-1])
-        	for(t = profile_triangles(index)) 
-				t
-	];
-	
-	start_cap = [range([0:P-1])];
-	end_cap   = [range([P*N-1 : -1 : P*(N-1)])];
+	faces = loop ? [
+		for(index = [1:N])
+			for(t = profile_triangles(index))
+				[for (i = t) i%M ]
+	] : let(
+		start_cap = [range([0:P-1])],
+		triangles = [for(index = [1:N-1]) for(t = profile_triangles(index)) t],
+		end_cap   = [range([P*N-1 : -1 : P*(N-1)])])
+			concat(start_cap, triangles, end_cap);
 
-	polyhedron(convexity=2, points=profiles, faces=concat(start_cap, triangles, end_cap));
+	polyhedron(convexity=2, points=agumented_profiles, faces=faces);
 }
 
 // Augments the profile with steiner points making the total number of vertices n 
