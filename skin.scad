@@ -34,15 +34,14 @@ module skin(profiles, loop=false /* unimplemented */) {
 
 // Augments the profile with steiner points making the total number of vertices n
 function augment_profile(profile, n) =
-  subdivide(
-    profile,
-    insert_extra_vertices_1(
-      [profile_lengths(profile),
-       dup(0,len(profile))
-      ],
-      n-len(profile)
-    )[1]
-  );
+  len(profile) == n ? profile :
+    subdivide(
+      profile,
+      insert_extra_vertices(
+        profile_lengths_excluding_short(profile, n),
+        n-len(profile)
+      )
+    );
 
 function subdivide(profile,subdivisions) = let (N=len(profile)) [
   for (i = [0:N-1])
@@ -57,32 +56,16 @@ function interpolate(a,b,subdivisions) = [
       a*(1-t)+b*t
 ];
 
-function distribute_extra_vertex(lengths_count,ma_=-1) =
-  ma_<0
-	? distribute_extra_vertex(lengths_count, max_element(lengths_count[0]))
-  : concat(
-      [set(lengths_count[0],ma_,lengths_count[0][ma_] * (lengths_count[1][ma_]+1) / (lengths_count[1][ma_]+2))],
-      [increment(lengths_count[1],max_element(lengths_count[0]),1)]);
-
-function insert_extra_vertices_0(lengths_count,n_extra) =
-  n_extra <= 0
-	? lengths_count
-  : insert_extra_vertices_0(
-      distribute_extra_vertex(lengths_count),
-      n_extra-1
-    );
-
-
-
-function insert_extra_vertices_1(lengths_count,n_extra) =
+function insert_extra_vertices(lengths,n_extra) =
+  let (counts = dup(0,len(lengths)))
   n_extra <= 0 ?
-    lengths_count
+    counts
   :
-    insert_extra_vertices_by_length(lengths_count[0], lengths_count[1], sum(lengths_count[0]), 0, n_extra);
+    insert_extra_vertices_by_length(lengths, counts, sum(lengths), 0, n_extra);
 
 function insert_extra_vertices_by_length(lengths, counts, length, curr, n) =
   curr >= n ?
-    [lengths, counts]
+    counts
   :
     insert_extra_vertices_by_length(
       lengths,
@@ -95,7 +78,7 @@ function insert_extra_vertex_at_length(lengths, counts, length) =
   increment(counts, element_at_length(lengths, length));
 
 function element_at_length(lengths, length, i=0, acc=0) =
-  acc+lengths[i] >= length || i >= len(lengths)?
+  i >= len(lengths) || acc+lengths[i] >= length ?
     i
   :
     element_at_length(lengths, length, i+1, acc+lengths[i]);
@@ -113,11 +96,6 @@ assert(element_at_length([1,2,1,3], 3.5)==2);
 assert(element_at_length([1,2,1,3], 6.5)==3);
 assert(element_at_length([1,2,1,3], 7)==3);
 assert(element_at_length([1,2,1,3], 7.5)==4);
-
-
-function assertion_failed() = (assertion_failed());
-module assert(bool, msg = ""){if(bool == false){echo("Assertion Failed: ", msg);
-  echo("", assertion_failed());}}
 */
 
 
@@ -130,6 +108,14 @@ function max_element(arr,ma_,ma_i_=-1,i_=0) = i_ >= len(arr) ? ma_i_ :
 function max_len(arr) = max([for (i=arr) len(i)]);
 
 function increment(arr,i,x=1) = set(arr,i,arr[i]+x);
+
+function profile_lengths_excluding_short(profile, n) =
+  let (
+    lengths = profile_lengths(profile),
+    overall = sum(lengths),
+    minLen = overall / n,
+  )
+  [ for (l = lengths) l<minLen ? 0 : l ];
 
 function profile_lengths(profile) = [
   for (i = [0:len(profile)-1])
@@ -153,7 +139,7 @@ function dup(value=0,n) = [for (i = [1:n]) value];
 
 /*
 // demonstrate distribution of points
-// if augment_profile uses insert_extra_vertices_0 or ..._1
+// if augment_profile used old insert_extra_vertices_0 or ..._1
 // where insert_extra_vertices_1 inserts more uniformly
 // whereas insert_extra_vertices_0 depends on chance rounding
 
