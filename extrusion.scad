@@ -33,6 +33,15 @@ rotate([90,0,0]) translate([0,0,3]) difference() {
 	);
 }
 
+// profiles that have different vertex counts
+translate([5,0,0])
+skin([
+	transform(translation([0,0,0]), circle($fn=70,r=1)),
+	transform(translation([0,0,1]), circle($fn=75,r=1)),
+	transform(translation([0,0,2]), circle($fn=100,r=1)),
+]);
+
+
 
 function rectangle_profile(size=[1,1]) = [	
 	// The first point is the anchor point, put it on the point corresponding to [cos(0),sin(0)]
